@@ -1,0 +1,80 @@
+[
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Música",
+        "description": "Hablemos de Música",
+        "type": "categories",
+        "slug": "musica",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  },
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Letras",
+        "description": "Hablemos de Letras",
+        "type": "categories",
+        "slug": "letras",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  },
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Video",
+        "description": "Hablemos de Video",
+        "type": "categories",
+        "slug": "video",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  },
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Entretenimiento",
+        "description": "Hablemos de Entretenimiento",
+        "type": "categories",
+        "slug": "entretenimiento",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  },
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Moda",
+        "description": "Hablemos de Moda",
+        "type": "categories",
+        "slug": "Moda",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  },
+  {
+    "data": {
+      "type": "catalog-items",
+      "attributes": {
+        "name": "Diseño",
+        "description": "Hablemos de Diseño",
+        "type": "categories",
+        "slug": "diseno",
+        "scope": ["CENTRAL"],
+        "parent": ""
+      }
+    }
+  }
+]
