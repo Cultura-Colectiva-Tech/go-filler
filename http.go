@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/fatih/color"
 )
 
 func makePetition(method, url string, body []byte, token *string) map[string]interface{} {
@@ -26,23 +28,18 @@ func makePetition(method, url string, body []byte, token *string) map[string]int
 	}
 	defer res.Body.Close()
 
-	bodyResponse, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	response := make(map[string]interface{})
 
-	err = json.Unmarshal(bodyResponse, &response)
+	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for k := range response {
-		if k == "errors" {
-			data, _ := json.Marshal(response)
-			log.Fatalf("The server has responded with: %s", data)
-		}
+	if res.StatusCode >= 400 {
+		data, _ := json.Marshal(response)
+
+		red := color.New(color.FgRed).SprintFunc()
+		log.Fatalf("The server has responded with: \"%s\" to the petition: %s on: %s", red(string(data[:])), red(req.Method), red(req.URL))
 	}
 
 	return response
