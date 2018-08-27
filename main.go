@@ -20,6 +20,9 @@ func main() {
 	environment := flag.String("environment", "dev", "Environment to make the petition {dev, staging}")
 	v := flag.Bool("v", false, "Print the version of the program")
 	version := flag.Bool("version", false, "Print the version of the program")
+	name := flag.String("name", "categories", "Name of catalog")
+	description := flag.String("description", "Description of Catalog", "Description of catalog")
+	typeContent := flag.String("type", "categories", "Type of Catalog's content to create")
 	flag.Parse()
 
 	if *v || *version {
@@ -42,7 +45,7 @@ func main() {
 	for k, v := range response {
 		if k == "data" {
 			for _, data := range v.([]interface{}) {
-				if data.(map[string]interface{})["attributes"].(map[string]interface{})["type"] == "categories" {
+				if data.(map[string]interface{})["attributes"].(map[string]interface{})["type"] == *typeContent {
 					id = data.(map[string]interface{})["id"].(string)
 				}
 			}
@@ -54,9 +57,9 @@ func main() {
 			"data": map[string]interface{}{
 				"type": "catalogs",
 				"attributes": map[string]string{
-					"name":        "categories",
-					"description": "Categories of the CMS 2.0",
-					"type":        "categories",
+					"name":        *name,
+					"description": *description,
+					"type":        *typeContent,
 				},
 			},
 		}
