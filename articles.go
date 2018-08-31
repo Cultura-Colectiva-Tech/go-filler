@@ -11,21 +11,38 @@ import (
 )
 
 func articlesLogic() {
-	url := urlPrefix + *environment + urlSuffix + *typeContent
+	url := urlPrefix + *environmentFlag + urlSuffix + *typeContentFlag
 
-	data := makePetition(http.MethodGet, *dataFlag, nil, nil)
+	body := "month=" + *monthFlag + "&year=" + *yearFlag + "&type=" + *typePostFlag
 
-	dataBytes, _ := json.Marshal(data)
+	// Get all the articles
+	responseArray := makePetitionResponseArray(http.MethodPost, *dataFlag, []byte(body), nil)
 
-	response := makePetition(http.MethodPost, url, dataBytes, token)
+	total := len(responseArray)
 
-	_, err := json.Marshal(response)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+	if total < 1 {
+		fmt.Println("There is no data to be processed")
+		os.Exit(0)
 	}
 
-	green := color.New(color.FgGreen).SprintFunc()
+	for k, v := range responseArray {
+		// Article URL
+		dataUrl := v["url"].(string)
 
-	fmt.Printf("Processing: %s\n", green(*dataFlag))
+		green := color.New(color.FgGreen).SprintFunc()
+		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+1), green(total), green(dataUrl))
+
+		// Get article data
+		data := makePetition(http.MethodGet, dataUrl, nil, nil)
+
+		dataBytes, _ := json.Marshal(data)
+
+		response := makePetition(http.MethodPost, url, dataBytes, tokenFlag)
+
+		_, err := json.Marshal(response)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+	}
 }

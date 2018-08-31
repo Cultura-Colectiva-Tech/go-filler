@@ -14,23 +14,31 @@ const (
 )
 
 var (
-	dataFlag    *string
-	token       *string
-	environment *string
-	name        *string
-	description *string
-	typeContent *string
+	dataFlag        *string
+	tokenFlag       *string
+	environmentFlag *string
+	nameFlag        *string
+	descriptionFlag *string
+	typeContentFlag *string
+	monthFlag       *string
+	yearFlag        *string
+	typePostFlag    *string
 )
 
 func main() {
-	dataFlag = flag.String("data", "https://cucodev.culturacolectiva.com/jsoncategory/", "URL for get the data (json) to add")
-	token = flag.String("token", "", "Token needed for make the petition")
-	environment = flag.String("environment", "dev", "Environment to make the petition {dev, staging}")
 	v := flag.Bool("v", false, "Print the version of the program")
 	version := flag.Bool("version", false, "Print the version of the program")
-	name = flag.String("name", "categories", "Name of catalog")
-	description = flag.String("description", "Description of Catalog", "Description of catalog")
-	typeContent = flag.String("type", "categories", "Type of Catalog's content to create")
+
+	dataFlag = flag.String("data", "https://cucodev.culturacolectiva.com/jsoncategory/", "URL for get the data (json) to add")
+	tokenFlag = flag.String("token", "", "Token needed for make the petition")
+	environmentFlag = flag.String("environment", "dev", "Environment to make the petition {dev, staging}")
+	nameFlag = flag.String("name", "categories", "Name of catalog")
+	descriptionFlag = flag.String("description", "Description of Catalog", "Description of catalog")
+	typeContentFlag = flag.String("type", "categories", "Type of Catalog's content to create")
+	monthFlag = flag.String("month", "01", "Month to bring Articles. Default: 01")
+	yearFlag = flag.String("year", "2018", "Year to bring Articles. Default: 2018")
+	typePostFlag = flag.String("type-post", "video", "Article type to be searched. Default: video")
+
 	flag.Parse()
 
 	if *v || *version {
@@ -38,16 +46,16 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *token == "" {
+	if *tokenFlag == "" {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
-	if *typeContent == "categories" || *typeContent == "tags" {
+	if *typeContentFlag == "categories" || *typeContentFlag == "tags" {
 		catalogsLogic()
 	}
 
-	if *typeContent == "articles" {
+	if *typeContentFlag == "articles" {
 		articlesLogic()
 	}
 }

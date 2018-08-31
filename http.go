@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -27,6 +28,12 @@ func makePetition(method, url string, body []byte, token *string) map[string]int
 		log.Fatal(err)
 	}
 	defer res.Body.Close()
+
+	// We need a better handle of this kind of errors
+	if res.StatusCode >= 500 {
+		fmt.Println(res)
+		log.Fatal("Something goes terribly wrong")
+	}
 
 	response := make(map[string]interface{})
 
@@ -59,11 +66,20 @@ func makePetitionResponseArray(method, url string, body []byte, token *string) [
 		req.Header.Add("Authorization", *token)
 	}
 
+	if url == "https://api.culturacolectiva.com/rest-api/apicms/v1/getArticleJson/" {
+		req.Header.Add("content-type", "application/x-www-form-urlencoded")
+	}
+
 	res, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer res.Body.Close()
+
+	// We need a better handle of this kind of errors
+	if res.StatusCode >= 500 {
+		log.Fatal("Something goes terribly wrong")
+	}
 
 	bodyResponse, err := ioutil.ReadAll(res.Body)
 	if err != nil {

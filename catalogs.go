@@ -7,9 +7,9 @@ import (
 )
 
 func catalogsLogic() {
-	urlCatalogs := urlPrefix + *environment + urlSuffix + urlCatalogsSuffix
+	urlCatalogs := urlPrefix + *environmentFlag + urlSuffix + urlCatalogsSuffix
 
-	response := makePetition(http.MethodGet, urlCatalogs, nil, token)
+	response := makePetition(http.MethodGet, urlCatalogs, nil, tokenFlag)
 
 	id := ""
 
@@ -17,7 +17,7 @@ func catalogsLogic() {
 	for k, v := range response {
 		if k == "data" {
 			for _, data := range v.([]interface{}) {
-				if data.(map[string]interface{})["attributes"].(map[string]interface{})["type"] == *typeContent {
+				if data.(map[string]interface{})["attributes"].(map[string]interface{})["type"] == *typeContentFlag {
 					id = data.(map[string]interface{})["id"].(string)
 				}
 			}
@@ -29,9 +29,9 @@ func catalogsLogic() {
 			"data": map[string]interface{}{
 				"type": "catalogs",
 				"attributes": map[string]string{
-					"name":        *name,
-					"description": *description,
-					"type":        *typeContent,
+					"name":        *nameFlag,
+					"description": *descriptionFlag,
+					"type":        *typeContentFlag,
 				},
 			},
 		}
@@ -39,7 +39,7 @@ func catalogsLogic() {
 		// Maybe this can be achieved with diferent approach, but for now, works
 		bodyCasted, _ := json.Marshal(body)
 
-		response = makePetition(http.MethodPost, urlCatalogs, bodyCasted, token)
+		response = makePetition(http.MethodPost, urlCatalogs, bodyCasted, tokenFlag)
 
 		for k, v := range response {
 			if k == "id" {
@@ -60,6 +60,6 @@ func catalogsLogic() {
 
 		fmt.Printf("Processing %d of %d: Name: %s\n", k+1, total, name)
 		body, _ := json.Marshal(v)
-		_ = makePetition(http.MethodPost, urlCatalogsItem, body, token)
+		_ = makePetition(http.MethodPost, urlCatalogsItem, body, tokenFlag)
 	}
 }
