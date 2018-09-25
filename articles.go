@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -43,6 +44,64 @@ func articlesLogic() {
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
+		}
+
+		// ID of the created article
+		id := response["id"]
+
+		// Get Data from article to make petitions accordingly
+		metaInfoItems := []string{"tags", "references"}
+
+		for _, meta := range metaInfoItems {
+			data := data["data"].(map[string]interface{})
+			attributes := data["attributes"].(map[string]interface{})
+			metaInfo := attributes["meta"].(map[string]interface{})[meta].([]interface{})
+			for _, item := range metaInfo {
+				element := strings.TrimSuffix(meta, "s")
+				element = strings.Title(element)
+
+				urlWithId := url + "/" + id.(string) + "/create" + element
+
+				attributes := make(map[string]interface{})
+
+				entity := ""
+
+				if meta == "tags" {
+					name := item.(map[string]interface{})["name"].(string)
+					attributes = map[string]interface{}{
+						"name": name,
+					}
+
+					entity = name
+				} else if meta == "references" {
+					title := item.(map[string]interface{})["title"].(string)
+					url := item.(map[string]interface{})["url"].(string)
+					attributes = map[string]interface{}{
+						"title": title,
+						"url":   url,
+					}
+
+					entity = title
+				}
+
+				data := map[string]interface{}{
+					"data": map[string]interface{}{
+						"type":       meta,
+						"attributes": attributes,
+					},
+				}
+
+				dataCasted, _ := json.Marshal(data)
+
+				fmt.Printf("Processing: %s: %s\n", element, green(entity))
+
+				response := makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+
+				if _, err := json.Marshal(response); err != nil {
+					log.Fatal(err)
+					os.Exit(1)
+				}
+			}
 		}
 	}
 }
