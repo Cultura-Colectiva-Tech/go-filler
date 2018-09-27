@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -50,56 +51,101 @@ func articlesLogic() {
 		id := response["id"]
 
 		// Get Data from article to make petitions accordingly
-		metaInfoItems := []string{"tags", "references"}
+		supplementInfo := []string{"author", "facebook", "editor", "seo", "ads", "meta"}
 
-		for _, meta := range metaInfoItems {
+		// Info
+		infoItems := map[string][]string{
+			"meta": []string{"tags", "references"},
+		}
+
+		for _, articleInfo := range supplementInfo {
 			data := data["data"].(map[string]interface{})
 			attributes := data["attributes"].(map[string]interface{})
-			metaInfo := attributes["meta"].(map[string]interface{})[meta].([]interface{})
-			for _, item := range metaInfo {
-				element := strings.TrimSuffix(meta, "s")
-				element = strings.Title(element)
 
-				urlWithId := url + "/" + id.(string) + "/create" + element
+			if articleInfo != "meta" {
+				info := attributes[articleInfo].(map[string]interface{})
 
-				attributes := make(map[string]interface{})
-
-				entity := ""
-
-				if meta == "tags" {
-					name := item.(map[string]interface{})["name"].(string)
-					attributes = map[string]interface{}{
-						"name": name,
+				// Custom logic for the ads
+				if articleInfo == "ads" {
+					for key, value := range info {
+						// We exclude the already string values
+						if key != "adUnit" {
+							info[key] = strconv.FormatBool(value.(bool))
+						}
 					}
-
-					entity = name
-				} else if meta == "references" {
-					title := item.(map[string]interface{})["title"].(string)
-					url := item.(map[string]interface{})["url"].(string)
-					attributes = map[string]interface{}{
-						"title": title,
-						"url":   url,
-					}
-
-					entity = title
 				}
 
 				data := map[string]interface{}{
 					"data": map[string]interface{}{
-						"type":       meta,
-						"attributes": attributes,
+						"type": "articles",
+						"attributes": map[string]interface{}{
+							articleInfo: info,
+						},
 					},
 				}
 
+				fmt.Printf("Processing: %s\n", green(articleInfo))
+
 				dataCasted, _ := json.Marshal(data)
 
-				fmt.Printf("Processing: %s: %s\n", element, green(entity))
+				urlWithId := url + "/" + id.(string)
 
-				response := makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+				response := makePetition(http.MethodPatch, urlWithId, dataCasted, tokenFlag)
 
 				if _, err := json.Marshal(response); err != nil {
 					log.Fatal(err)
 					os.Exit(1)
+				}
+			}
+
+			for _, meta := range infoItems[articleInfo] {
+				info := attributes[articleInfo].(map[string]interface{})[meta].([]interface{})
+
+				for _, item := range info {
+					element := strings.TrimSuffix(meta, "s")
+					element = strings.Title(element)
+
+					urlWithId := url + "/" + id.(string) + "/create" + element
+
+					attributes := make(map[string]interface{})
+
+					entity := ""
+
+					if meta == "tags" {
+						name := item.(map[string]interface{})["name"].(string)
+						attributes = map[string]interface{}{
+							"name": name,
+						}
+
+						entity = name
+					} else if meta == "references" {
+						title := item.(map[string]interface{})["title"].(string)
+						url := item.(map[string]interface{})["url"].(string)
+						attributes = map[string]interface{}{
+							"title": title,
+							"url":   url,
+						}
+
+						entity = title
+					}
+
+					data := map[string]interface{}{
+						"data": map[string]interface{}{
+							"type":       meta,
+							"attributes": attributes,
+						},
+					}
+
+					dataCasted, _ := json.Marshal(data)
+
+					fmt.Printf("Processing: %s: %s\n", element, green(entity))
+
+					response := makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+
+					if _, err := json.Marshal(response); err != nil {
+						log.Fatal(err)
+						os.Exit(1)
+					}
 				}
 			}
 		}
