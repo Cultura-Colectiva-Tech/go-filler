@@ -75,6 +75,26 @@ func articlesLogic() {
 					}
 				}
 
+				if articleInfo == "seo" {
+					for _, keywordName := range info["keywords"].([]interface{}) {
+
+						data := map[string]interface{}{
+							"data": map[string]interface{}{
+								"type": "keywords",
+								"attributes": map[string]interface{}{
+									"name": keywordName,
+								},
+							},
+						}
+
+						dataCasted, _ := json.Marshal(data)
+
+						urlWithId := url + "/" + id.(string) + "/createKeyword"
+
+						makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+					}
+				}
+
 				data := map[string]interface{}{
 					"data": map[string]interface{}{
 						"type": "articles",
