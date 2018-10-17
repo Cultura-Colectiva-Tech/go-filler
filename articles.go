@@ -17,22 +17,34 @@ func articlesLogic() {
 
 	body := "month=" + *monthFlag + "&year=" + *yearFlag + "&type=" + *typePostFlag
 
+	initIndex := *initIndexFlag
+
 	// Get all the articles
 	responseArray := makePetitionResponseArray(http.MethodPost, *dataFlag, []byte(body), nil)
 
 	total := len(responseArray)
+
+	if initIndex != 1 {
+		if initIndex <= 1 || initIndex > total {
+			fmt.Println("Index range not valid")
+			os.Exit(0)
+		}
+	}
+
+	initIndex = (*initIndexFlag - 1)
 
 	if total < 1 {
 		fmt.Println("There is no data to be processed")
 		os.Exit(0)
 	}
 
-	for k, v := range responseArray {
+	for k, v := range responseArray[initIndex:] {
+
 		// Article URL
 		dataUrl := v["url"].(string)
 
 		green := color.New(color.FgGreen).SprintFunc()
-		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+1), green(total), green(dataUrl))
+		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+*initIndexFlag), green(total), green(dataUrl))
 
 		// Get article data
 		data := makePetition(http.MethodGet, dataUrl, nil, nil)

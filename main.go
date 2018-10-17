@@ -23,6 +23,7 @@ var (
 	monthFlag       *string
 	yearFlag        *string
 	typePostFlag    *string
+	initIndexFlag   *int
 )
 
 func main() {
@@ -38,6 +39,7 @@ func main() {
 	monthFlag = flag.String("month", "01", "Month to bring Articles. Default: 01")
 	yearFlag = flag.String("year", "2018", "Year to bring Articles. Default: 2018")
 	typePostFlag = flag.String("type-post", "video", "Article type to be searched. Default: video")
+	initIndexFlag = flag.Int("init-index", 1, "Index to start search Articles")
 
 	flag.Parse()
 
