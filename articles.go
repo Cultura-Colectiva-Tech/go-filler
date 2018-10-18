@@ -67,7 +67,7 @@ func articlesLogic() {
 
 		// Info
 		infoItems := map[string][]string{
-			"meta": []string{"tags", "references"},
+			"meta": []string{"tags", "references", "properties"},
 		}
 
 		for _, articleInfo := range supplementInfo {
@@ -137,6 +137,10 @@ func articlesLogic() {
 					element := strings.TrimSuffix(meta, "s")
 					element = strings.Title(element)
 
+					if element == "Propertie" {
+						element = "Property"
+					}
+
 					urlWithId := url + "/" + id.(string) + "/create" + element
 
 					attributes := make(map[string]interface{})
@@ -159,6 +163,14 @@ func articlesLogic() {
 						}
 
 						entity = title
+					} else if meta == "properties" {
+						coverImage := item.(map[string]interface{})["coverImage"].(string)
+						attributes = map[string]interface{}{
+							"name":  "coverImage",
+							"value": coverImage,
+						}
+
+						entity = coverImage
 					}
 
 					data := map[string]interface{}{
