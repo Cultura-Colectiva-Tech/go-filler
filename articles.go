@@ -149,8 +149,10 @@ func articlesLogic() {
 
 					if meta == "tags" {
 						name := item.(map[string]interface{})["name"].(string)
+						slug := item.(map[string]interface{})["slug"].(string)
 						attributes = map[string]interface{}{
 							"name": name,
+							"slug": slug,
 						}
 
 						entity = name
