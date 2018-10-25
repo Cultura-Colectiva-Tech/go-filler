@@ -20,7 +20,12 @@ func articlesLogic() {
 	initIndex := *initIndexFlag
 
 	// Get all the articles
-	responseArray := makePetitionResponseArray(http.MethodPost, *dataFlag, []byte(body), nil)
+	responseArray, err := makePetitionResponseArray(http.MethodPost, *dataFlag, []byte(body), nil)
+
+	if err != nil {
+		formatError("Can't process request. The error was", err)
+		os.Exit(0)
+	}
 
 	total := len(responseArray)
 
@@ -41,22 +46,30 @@ func articlesLogic() {
 	for k, v := range responseArray[initIndex:] {
 
 		// Article URL
-		dataUrl := v["url"].(string)
+		dataURL := v["url"].(string)
 
 		green := color.New(color.FgGreen).SprintFunc()
-		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+*initIndexFlag), green(total), green(dataUrl))
+		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+*initIndexFlag), green(total), green(dataURL))
 
 		// Get article data
-		data := makePetition(http.MethodGet, dataUrl, nil, nil)
+		data, dataError := makePetition(http.MethodGet, dataURL, nil, nil)
+		if dataError != nil {
+			log.Print(dataError)
+			continue
+		}
 
 		dataBytes, _ := json.Marshal(data)
 
-		response := makePetition(http.MethodPost, url, dataBytes, tokenFlag)
+		response, artError := makePetition(http.MethodPost, url, dataBytes, tokenFlag)
+		if artError != nil {
+			log.Print(artError)
+			continue
+		}
 
-		_, err := json.Marshal(response)
-		if err != nil {
-			log.Fatal(err)
-			os.Exit(1)
+		_, marshalError := json.Marshal(response)
+		if marshalError != nil {
+			log.Print(marshalError)
+			continue
 		}
 
 		// ID of the created article
@@ -101,9 +114,9 @@ func articlesLogic() {
 
 						dataCasted, _ := json.Marshal(data)
 
-						urlWithId := url + "/" + id.(string) + "/createKeyword"
+						urlWithID := url + "/" + id.(string) + "/createKeyword"
 
-						makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+						makePetition(http.MethodPost, urlWithID, dataCasted, tokenFlag)
 					}
 				}
 
@@ -120,11 +133,11 @@ func articlesLogic() {
 
 				dataCasted, _ := json.Marshal(data)
 
-				urlWithId := url + "/" + id.(string)
+				urlWithID := url + "/" + id.(string)
 
-				response := makePetition(http.MethodPatch, urlWithId, dataCasted, tokenFlag)
+				response, error := makePetition(http.MethodPatch, urlWithID, dataCasted, tokenFlag)
 
-				if _, err := json.Marshal(response); err != nil {
+				if _, err := json.Marshal(response); error != nil {
 					log.Fatal(err)
 					os.Exit(1)
 				}
@@ -141,7 +154,7 @@ func articlesLogic() {
 						element = "Property"
 					}
 
-					urlWithId := url + "/" + id.(string) + "/create" + element
+					urlWithID := url + "/" + id.(string) + "/create" + element
 
 					attributes := make(map[string]interface{})
 
@@ -186,11 +199,11 @@ func articlesLogic() {
 
 					fmt.Printf("Processing: %s: %s\n", element, green(entity))
 
-					response := makePetition(http.MethodPost, urlWithId, dataCasted, tokenFlag)
+					response, metaError := makePetition(http.MethodPost, urlWithID, dataCasted, tokenFlag)
 
-					if _, err := json.Marshal(response); err != nil {
-						log.Fatal(err)
-						os.Exit(1)
+					if _, err := json.Marshal(response); metaError != nil {
+						log.Println(err)
+						continue
 					}
 				}
 			}

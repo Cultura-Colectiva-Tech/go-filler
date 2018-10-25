@@ -9,7 +9,7 @@ import (
 func catalogsLogic() {
 	urlCatalogs := urlPrefix + *environmentFlag + urlSuffix + urlCatalogsSuffix
 
-	response := makePetition(http.MethodGet, urlCatalogs, nil, tokenFlag)
+	response, _ := makePetition(http.MethodGet, urlCatalogs, nil, tokenFlag)
 
 	id := ""
 
@@ -39,7 +39,7 @@ func catalogsLogic() {
 		// Maybe this can be achieved with diferent approach, but for now, works
 		bodyCasted, _ := json.Marshal(body)
 
-		response = makePetition(http.MethodPost, urlCatalogs, bodyCasted, tokenFlag)
+		response, _ = makePetition(http.MethodPost, urlCatalogs, bodyCasted, tokenFlag)
 
 		for k, v := range response {
 			if k == "id" {
@@ -48,7 +48,7 @@ func catalogsLogic() {
 		}
 	}
 
-	responseArray := makePetitionResponseArray(http.MethodGet, *dataFlag, nil, nil)
+	responseArray, _ := makePetitionResponseArray(http.MethodGet, *dataFlag, nil, nil)
 
 	total := len(responseArray)
 
@@ -60,6 +60,6 @@ func catalogsLogic() {
 
 		fmt.Printf("Processing %d of %d: Name: %s\n", k+1, total, name)
 		body, _ := json.Marshal(v)
-		_ = makePetition(http.MethodPost, urlCatalogsItem, body, tokenFlag)
+		_, _ = makePetition(http.MethodPost, urlCatalogsItem, body, tokenFlag)
 	}
 }

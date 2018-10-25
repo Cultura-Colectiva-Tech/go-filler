@@ -11,12 +11,13 @@ import (
 	"github.com/fatih/color"
 )
 
-func makePetition(method, url string, body []byte, token *string) map[string]interface{} {
+func makePetition(method, url string, body []byte, token *string) (map[string]interface{}, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		log.Fatal(err)
+		httpError := formatError("We can't process request. The error was", err)
+		return nil, httpError
 	}
 
 	if token != nil {
@@ -25,7 +26,8 @@ func makePetition(method, url string, body []byte, token *string) map[string]int
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		cliError := formatError("Client failed. The error was", err)
+		return nil, cliError
 	}
 	defer res.Body.Close()
 
@@ -39,27 +41,32 @@ func makePetition(method, url string, body []byte, token *string) map[string]int
 
 	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
-		log.Fatal(err)
+		jsonError := formatError("We can't parse the JSON. The error was", err)
+		return nil, jsonError
 	}
 
 	if res.StatusCode >= 400 {
 		data, _ := json.Marshal(response)
 
 		red := color.New(color.FgRed).SprintFunc()
-		log.Fatalf("The server has responded with: \"%s\" to the petition: %s on: %s", red(string(data[:])), red(req.Method), red(req.URL))
+		msg := fmt.Sprintf("The server has responded with: \"%s\" to the petition: %s on: %s", red(string(data[:])), red(req.Method), red(req.URL))
+		badRequestError := formatError(msg, err)
+
+		return nil, badRequestError
 	}
 
-	return response
+	return response, nil
 }
 
 // The unique difference between this function and the `makePetittion` is the response and what is downloaded
 // These functionalities can be made by only one function
-func makePetitionResponseArray(method, url string, body []byte, token *string) []map[string]interface{} {
+func makePetitionResponseArray(method, url string, body []byte, token *string) ([]map[string]interface{}, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		log.Fatal(err)
+		requestError := formatError("We can't process request. The error was", err)
+		return nil, requestError
 	}
 
 	if token != nil {
@@ -72,7 +79,8 @@ func makePetitionResponseArray(method, url string, body []byte, token *string) [
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		cliError := formatError("Client failed", err)
+		return nil, cliError
 	}
 	defer res.Body.Close()
 
@@ -83,15 +91,17 @@ func makePetitionResponseArray(method, url string, body []byte, token *string) [
 
 	bodyResponse, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		jsonError := formatError("Can't ready body. The error was", err)
+		return nil, jsonError
 	}
 
 	response := make([]map[string]interface{}, 0)
 
 	err = json.Unmarshal(bodyResponse, &response)
 	if err != nil {
-		log.Fatal(err)
+		marshalError := formatError("Unmarshal process failed. The error was", err)
+		return nil, marshalError
 	}
 
-	return response
+	return response, nil
 }
