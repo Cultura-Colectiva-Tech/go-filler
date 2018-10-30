@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -14,16 +15,17 @@ const (
 )
 
 var (
-	dataFlag        *string
-	tokenFlag       *string
-	environmentFlag *string
-	nameFlag        *string
-	descriptionFlag *string
-	typeContentFlag *string
-	monthFlag       *string
-	yearFlag        *string
-	typePostFlag    *string
-	initIndexFlag   *int
+	dataFlag         *string
+	tokenFlag        *string
+	environmentFlag  *string
+	nameFlag         *string
+	descriptionFlag  *string
+	typeContentFlag  *string
+	monthFlag        *string
+	yearFlag         *string
+	typePostFlag     *string
+	initIndexFlag    *int
+	articlesJSONFlag *string
 )
 
 func main() {
@@ -39,7 +41,8 @@ func main() {
 	monthFlag = flag.String("month", "01", "Month to bring Articles. Default: 01")
 	yearFlag = flag.String("year", "2018", "Year to bring Articles. Default: 2018")
 	typePostFlag = flag.String("type-post", "video", "Article type to be searched. Default: video")
-	initIndexFlag = flag.Int("init-index", 1, "Index to start search Articles")
+	initIndexFlag = flag.Int("init-index", 0, "Index to start search Articles")
+	articlesJSONFlag = flag.String("jsons", "", "Migrate one element")
 
 	flag.Parse()
 
@@ -54,7 +57,17 @@ func main() {
 	}
 
 	if *typeContentFlag == "categories" || *typeContentFlag == "tags" {
-		catalogsLogic()
+		if *articlesJSONFlag != "" {
+			fmt.Println("Don't support filler from url json")
+			os.Exit(0)
+		}
+	}
+
+	if *articlesJSONFlag != "" && *typeContentFlag == "articles" {
+		jsons := strings.Split(*articlesJSONFlag, ",")
+		if len(jsons) > 0 {
+			fillArticleFromJSON(jsons)
+		}
 	}
 
 	if *typeContentFlag == "articles" {

@@ -12,8 +12,26 @@ import (
 	"github.com/fatih/color"
 )
 
+func fillArticleFromJSON(jsons []string) {
+	var data [](map[string]interface{})
+	for _, v := range jsons {
+		j := map[string]interface{}{
+			"url": v,
+		}
+
+		data = append(data, j)
+	}
+
+	if *initIndexFlag > 0 {
+		fmt.Println("Don't support index")
+		os.Exit(0)
+	}
+
+	process(data, *initIndexFlag)
+	os.Exit(0)
+}
+
 func articlesLogic() {
-	url := urlPrefix + *environmentFlag + urlSuffix + *typeContentFlag
 
 	body := "month=" + *monthFlag + "&year=" + *yearFlag + "&type=" + *typePostFlag
 
@@ -29,27 +47,37 @@ func articlesLogic() {
 
 	total := len(responseArray)
 
-	if initIndex != 1 {
-		if initIndex <= 1 || initIndex > total {
+	if initIndex != 0 {
+		if initIndex > total {
 			fmt.Println("Index range not valid")
 			os.Exit(0)
 		}
-	}
 
-	initIndex = (*initIndexFlag - 1)
+		initIndex = (*initIndexFlag - 1)
+	}
 
 	if total < 1 {
 		fmt.Println("There is no data to be processed")
 		os.Exit(0)
 	}
 
-	for k, v := range responseArray[initIndex:] {
+	process(responseArray, initIndex)
+}
 
+/**
+ * Generic function to process data
+ */
+func process(data []map[string]interface{}, index int) {
+	url := urlPrefix + *environmentFlag + urlSuffix + *typeContentFlag
+	total := len(data)
+	init := index
+
+	for k, v := range data[init:] {
 		// Article URL
 		dataURL := v["url"].(string)
 
 		green := color.New(color.FgGreen).SprintFunc()
-		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+*initIndexFlag), green(total), green(dataURL))
+		fmt.Printf("Processing: %s of %s, URL: %s\n", green(k+(init+1)), green(total), green(dataURL))
 
 		// Get article data
 		data, dataError := makePetition(http.MethodGet, dataURL, nil, nil)
@@ -138,8 +166,8 @@ func articlesLogic() {
 				response, error := makePetition(http.MethodPatch, urlWithID, dataCasted, tokenFlag)
 
 				if _, err := json.Marshal(response); error != nil {
-					log.Fatal(err)
-					os.Exit(1)
+					log.Println(err)
+					continue
 				}
 			}
 
