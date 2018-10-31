@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +12,38 @@ import (
 
 	"github.com/fatih/color"
 )
+
+func fillArticleFromFile(path string) {
+
+	if *articlesJSONFlag != "" {
+		fmt.Println("Don't use json url param")
+		os.Exit(0)
+	}
+
+	data, error := os.Open(*pathFileFlag)
+	if error != nil {
+		formatError("Can't process file", error)
+	}
+
+	defer data.Close()
+
+	urls := []string{}
+	scanner := bufio.NewScanner(data)
+	for scanner.Scan() {
+		text := strings.Trim(scanner.Text(), " ")
+		urls = append(urls, text)
+	}
+
+	total := len(urls)
+
+	if total == 0 {
+		fmt.Println("File is empty")
+	}
+
+	if total > 0 {
+		fillArticleFromJSON(urls)
+	}
+}
 
 func fillArticleFromJSON(jsons []string) {
 	var data [](map[string]interface{})

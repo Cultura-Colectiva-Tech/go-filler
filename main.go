@@ -12,6 +12,7 @@ const (
 	urlSuffix             = ".api.culturacolectiva.com/"
 	urlCatalogsSuffix     = "catalogs"
 	urlCatalogsItemSuffix = "/item"
+	articlesType          = "articles"
 )
 
 var (
@@ -26,6 +27,7 @@ var (
 	typePostFlag     *string
 	initIndexFlag    *int
 	articlesJSONFlag *string
+	pathFileFlag     *string
 )
 
 func main() {
@@ -43,6 +45,7 @@ func main() {
 	typePostFlag = flag.String("type-post", "video", "Article type to be searched. Default: video")
 	initIndexFlag = flag.Int("init-index", 0, "Index to start search Articles")
 	articlesJSONFlag = flag.String("jsons", "", "Migrate one element")
+	pathFileFlag = flag.String("path-file", "", "Describe file path to use")
 
 	flag.Parse()
 
@@ -63,14 +66,27 @@ func main() {
 		}
 	}
 
-	if *articlesJSONFlag != "" && *typeContentFlag == "articles" {
+	/**
+	 * Source from File
+	 */
+	if *pathFileFlag != "" && *typeContentFlag == articlesType {
+		fillArticleFromFile(*pathFileFlag)
+	}
+
+	/**
+	 * Source from JSON URls param
+	 */
+	if *articlesJSONFlag != "" && *typeContentFlag == articlesType {
 		jsons := strings.Split(*articlesJSONFlag, ",")
 		if len(jsons) > 0 {
 			fillArticleFromJSON(jsons)
 		}
 	}
 
-	if *typeContentFlag == "articles" {
+	/**
+	 * Default logic for articles
+	 */
+	if *typeContentFlag == articlesType {
 		articlesLogic()
 	}
 }
