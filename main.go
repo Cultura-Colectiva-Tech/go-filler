@@ -9,7 +9,8 @@ import (
 
 const (
 	urlPrefix             = "https://"
-	urlSuffix             = ".api.culturacolectiva.com/"
+	urlServiceAPI         = ".api"
+	urlSuffix             = ".culturacolectiva.com/"
 	urlCatalogsSuffix     = "catalogs"
 	urlCatalogsItemSuffix = "/item"
 	articlesType          = "articles"
@@ -28,6 +29,7 @@ var (
 	initIndexFlag    *int
 	articlesJSONFlag *string
 	pathFileFlag     *string
+	siteFrontendURL  string
 )
 
 func main() {
@@ -47,7 +49,15 @@ func main() {
 	articlesJSONFlag = flag.String("jsons", "", "Migrate one element")
 	pathFileFlag = flag.String("path-file", "", "Describe file path to use")
 
+	configOrigin := map[string]string{
+		"dev":     "dev.cms",
+		"staging": "staging.cms",
+		"prod":    "cms2",
+	}
+
 	flag.Parse()
+
+	siteFrontendURL = urlPrefix + configOrigin[*environmentFlag] + urlSuffix
 
 	if *v || *version {
 		fmt.Printf("go-filler version %s\n", appVersion)

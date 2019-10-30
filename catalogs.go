@@ -7,7 +7,7 @@ import (
 )
 
 func catalogsLogic() {
-	urlCatalogs := urlPrefix + *environmentFlag + urlSuffix + urlCatalogsSuffix
+	urlCatalogs := urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + urlCatalogsSuffix
 
 	response, _ := makePetition(http.MethodGet, urlCatalogs, nil, tokenFlag)
 

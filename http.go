@@ -20,6 +20,8 @@ func makePetition(method, url string, body []byte, token *string) (map[string]in
 		return nil, httpError
 	}
 
+	req.Header.Add("Origin", siteFrontendURL)
+
 	if token != nil {
 		req.Header.Add("Authorization", *token)
 	}

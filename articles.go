@@ -101,7 +101,7 @@ func articlesLogic() {
  * Generic function to process data
  */
 func process(data []map[string]interface{}, index int) {
-	url := urlPrefix + *environmentFlag + urlSuffix + *typeContentFlag
+	url := urlPrefix + *environmentFlag + urlServiceAPI + urlSuffix + *typeContentFlag
 	total := len(data)
 	init := index
 
